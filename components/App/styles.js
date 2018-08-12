@@ -1,0 +1,47 @@
+import { StyleSheet } from 'react-native';
+
+export const rawStyles = {
+  base: {
+    display: 'flex',
+    width: '100%',
+    height: '100%',
+    paddingTop: 20,
+    backgroundColor: '#999',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inner: {
+    position: 'relative',
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#fff'
+  },
+  screen: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: 'rgba(255,255,255,.9)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1
+  },
+  screenText: {
+    fontSize: 40
+  },
+  button: {
+    width: 150,
+    height: 40,
+    backgroundColor: 'blue',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20
+  },
+  buttonText: {
+    color: '#fff'
+  }
+};
+
+export const styles = StyleSheet.create(rawStyles);
