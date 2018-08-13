@@ -33,7 +33,7 @@ class Tile extends Component {
   componentDidUpdate(prevProps) {
   	const coordsChanged = prevProps.x !== this.props.x || prevProps.y !== this.props.y;
   	if (coordsChanged && this.props.canMove) {
-  		this.animatePosition({x: this.props.x, y: this.props.y}, 250);	
+  		this.animatePosition({x: this.props.x, y: this.props.y}, 250, Easing.bounce);	
   	}
   }
 
@@ -62,11 +62,11 @@ class Tile extends Component {
     const onTarget = this.props.targetIsHovered(this.props.label);
     const coords = onTarget ? this.props.targetCoords : {x: this.props.x, y: this.props.y};
     const duration = onTarget ? 250 : 500;
-    this.animatePosition(coords, duration, onTarget);
+    this.animatePosition(coords, duration, onTarget ? undefined : Easing.bounce, onTarget);
     this.props.setCoords(null, null);
   }
 
-  animatePosition({x, y}, duration, slotTile) {
+  animatePosition({x, y}, duration, easing = Easing.bezier(0.86, 0, 0.07, 1), slotTile = false) {
   	const translate = new Animated.ValueXY({
       x: this.state.x,
       y: this.state.y
@@ -78,7 +78,7 @@ class Tile extends Component {
 	        x: x,
 	        y: y
 	      },
-	      easing: Easing.bezier(0.86, 0, 0.07, 1),
+	      easing: easing,
 	      duration: duration
 	    }).start( () => {
 	      this.setState({
@@ -98,8 +98,7 @@ class Tile extends Component {
   	const style = {
   		width: this.props.width,
   		height: this.props.height,
-  		backgroundColor: this.props.color,
-  		opacity: this.props.played ? 0 : 1
+  		backgroundColor: this.props.played ? 'rgba(0,150,0,.9)' : this.props.color
   	}
   	if (this.state.translate) {
   		style.left = this.state.translate.x;
@@ -110,6 +109,9 @@ class Tile extends Component {
   	}
     return (
       <Animated.View style={[styles.base, style, {zIndex: this.state.dragging ? 1 : 0}]} {...this.panResponder.panHandlers}>
+      	{!this.props.played &&
+      		<Text style={styles.helpText}>drag me!</Text>	
+      	}
       	<Text style={styles.text}>{this.props.label}</Text>	
       </Animated.View>
     );

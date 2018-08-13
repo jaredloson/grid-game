@@ -23,13 +23,14 @@ export const rawStyles = {
     right: 0,
     bottom: 0,
     left: 0,
+    padding: 20,
     backgroundColor: 'rgba(255,255,255,.9)',
     alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1
+    justifyContent: 'center'
   },
   screenText: {
-    fontSize: 40
+    fontSize: 40,
+    color: '#333'
   },
   button: {
     width: 150,
@@ -40,7 +41,7 @@ export const rawStyles = {
     marginTop: 20
   },
   buttonText: {
-    color: '#fff'
+    color: 'white'
   }
 };
 

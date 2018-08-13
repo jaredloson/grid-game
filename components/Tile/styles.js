@@ -5,9 +5,7 @@ export const styles = StyleSheet.create({
     position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
-    borderBottomWidth: 1,
-    borderRightWidth: 1,
-    borderColor: '#fff'
+    zIndex: 1
   },
   tileEndRow: {
   	borderRightWidth: 0
@@ -15,5 +13,9 @@ export const styles = StyleSheet.create({
   text: {
   	fontSize: 40,
   	color: '#fff'
+  },
+  helpText: {
+  	color: '#fff',
+  	marginBottom: 10
   }
 });

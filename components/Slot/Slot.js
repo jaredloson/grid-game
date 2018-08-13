@@ -13,6 +13,7 @@ class Slot extends Component {
       left: this.props.x,
       top: this.props.y,
       backgroundColor: this.props.isOdd ? 'rgba(0,0,0,.1)' : 'rgba(0,0,0,.05)',
+      opacity: this.props.slotted ? 0 : 1
     }
     if (this.props.isHovered) {
       style.backgroundColor = 'rgba(0,0,0,.25)';
