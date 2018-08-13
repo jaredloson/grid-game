@@ -5,7 +5,6 @@ export const rawStyles = {
     display: 'flex',
     width: '100%',
     height: '100%',
-    paddingTop: 20,
     backgroundColor: '#999',
     alignItems: 'center',
     justifyContent: 'center',
@@ -24,7 +23,7 @@ export const rawStyles = {
     bottom: 0,
     left: 0,
     padding: 20,
-    backgroundColor: 'rgba(255,255,255,.9)',
+    backgroundColor: 'rgba(255,255,255,1)',
     alignItems: 'center',
     justifyContent: 'center'
   },

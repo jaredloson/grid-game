@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { View, Text } from 'react-native';
 import { styles } from './styles';
+import { CLOCKHEIGHT } from '../../config';
+
 
 class Clock extends Component {
 
@@ -13,7 +15,7 @@ class Clock extends Component {
 
   render() {
     return (
-      <View style={styles.base}>
+      <View style={[styles.base, {height: CLOCKHEIGHT}]}>
         <Text style={styles.clock}>{this.getClockTime(this.props.time)}</Text>
       </View>
     );

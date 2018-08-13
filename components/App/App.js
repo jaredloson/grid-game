@@ -5,7 +5,7 @@ import Clock from '../Clock/Clock';
 import Slot from '../Slot/Slot';
 import Tile from '../Tile/Tile';
 import FadeView from '../../animators/FadeView';
-import { STAGEWIDTH, STAGEHEIGHT, TILES, COLUMNS, WIDTH, ROWS, HEIGHT } from '../../config';
+import { TOPPAD, BOTTOMPAD, STAGEWIDTH, STAGEHEIGHT, TILES, COLUMNS, WIDTH, HEIGHT } from '../../config';
 import { shuffle } from '../../utils';
 
 class App extends Component {
@@ -25,7 +25,7 @@ class App extends Component {
     this.setupGame = this.setupGame.bind(this);
   }
 
-  setupGame(isNew) {
+  setupGame() {
     const gameObject = {
       currentX: null,
       currentY: null,
@@ -43,7 +43,7 @@ class App extends Component {
     const self = this;
     this.interval = setInterval( () => {
       // timeout after 10 mins
-      if (self.state.time > 1000 * 60 * 10) {
+      if (self.state.time >= 1000 * 60 * 10) {
         clearInterval(self.interval);
         self.setState({time: 0, showIntro: true});
         return;
@@ -56,11 +56,6 @@ class App extends Component {
       // else update clock
       self.setState({time: self.state.time + 1000})
     }, 1000);
-  }
-
-  clearInterval() {
-    clearInterval(this.interval);
-    this.setState({time: 0});
   }
 
   playableShuffledTiles() {
@@ -118,7 +113,7 @@ class App extends Component {
     const gameComplete = this.state.playedTiles.length === this.state.tiles.length && this.state.tiles.length > 0;
 
     return (
-      <View style={styles.base}>
+      <View style={{...rawStyles.base, paddingTop: TOPPAD, paddingBottom: BOTTOMPAD}}>
 
         {/* CLOCK */}
         <Clock time={this.state.time} />
@@ -141,12 +136,12 @@ class App extends Component {
           {/* COMPLETE SCREEN */}
           <FadeView
             fadeTo={ gameComplete ? 1 : 0}
-            duration={300}
-            styles={{...rawStyles.screen, top: 'auto', height: HEIGHT, zIndex: gameComplete ? 999 : 0}}
+            duration={gameComplete ? 300 : 0}
+            styles={{...rawStyles.screen, zIndex: gameComplete ? 999 : 0}}
           >
             <Text style={styles.screenText}>congrats!</Text>
             <TouchableOpacity activeOpacity={.5} onPress={this.setupGame} style={styles.button}>
-              <Text style={styles.buttonText}>restart</Text>
+              <Text style={styles.buttonText}>play again</Text>
             </TouchableOpacity>
           </FadeView>
 
@@ -163,7 +158,6 @@ class App extends Component {
               slotted={this.state.playedTiles.includes(tile)}
             />
           )}
-
 
           {/* ROW OF MOVABLE TILES AT STARTING POSITION */}
           {this.state.tiles.map( (tile, idx) =>
