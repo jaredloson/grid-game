@@ -14,6 +14,13 @@ export const styles = StyleSheet.create({
   	fontSize: 40,
   	color: '#fff'
   },
+  help: {
+    position: 'absolute',
+    top: 10,
+    left: 0,
+    right: 0,
+    alignItems: 'center'
+  },
   helpText: {
   	color: '#fff',
   	marginBottom: 10

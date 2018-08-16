@@ -23,7 +23,7 @@ export const rawStyles = {
     bottom: 0,
     left: 0,
     padding: 20,
-    backgroundColor: 'rgba(255,255,255,1)',
+    backgroundColor: 'rgba(255,255,255,.9)',
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -41,6 +41,10 @@ export const rawStyles = {
   },
   buttonText: {
     color: 'white'
+  },
+  slotStub: {
+    position: 'absolute',
+    zIndex: 0
   }
 };
 

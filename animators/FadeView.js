@@ -14,7 +14,8 @@ class FadeView extends Component {
     if (prevProps.fadeTo !== this.props.fadeTo && !this.props.disabled) {
       Animated.timing(this.state.fadeTo, {
         toValue: this.props.fadeTo,
-        duration: this.props.duration
+        duration: this.props.duration,
+        delay: this.props.delay || 0
       }).start();
     }
   }

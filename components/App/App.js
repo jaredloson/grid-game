@@ -14,15 +14,18 @@ class App extends Component {
     super();
     this.state = {
       showIntro: true,
+      showComplete: false,
+      gameStarted: false,
       currentX: null,
       currentY: null,
       tiles: [],
       shuffledTiles: [],
-      playedTiles: [],
-      time: 0
+      playedTiles: []
     }
-    this.setCoords = this.setCoords.bind(this);
+    this.setXY = this.setXY.bind(this);
     this.setupGame = this.setupGame.bind(this);
+    this.slotTile = this.slotTile.bind(this);
+    this.slotIsHovered = this.slotIsHovered.bind(this);
   }
 
   setupGame() {
@@ -31,41 +34,19 @@ class App extends Component {
       currentY: null,
       playedTiles: [],
       time: 0,
-      showIntro: false
+      showIntro: false,
+      gameStarted: true
     }
     gameObject.tiles = this.state.tiles.length > 0 ? this.state.tiles : Array.apply(null, new Array(TILES)).map( (item, idx) => ( {label: idx + 1} ));
     gameObject.shuffledTiles = shuffle(gameObject.tiles.slice());
     this.setState(gameObject);
-    this.setupInterval();
   }
 
-  setupInterval() {
-    const self = this;
-    this.interval = setInterval( () => {
-      // timeout after 10 mins
-      if (self.state.time >= 1000 * 60 * 10) {
-        clearInterval(self.interval);
-        self.setState({time: 0, showIntro: true});
-        return;
-      }
-      //clear interval if game complete
-      if (self.state.playedTiles.length === self.state.tiles.length) {
-        clearInterval(self.interval);
-        return;
-      }
-      // else update clock
-      self.setState({time: self.state.time + 1000})
-    }, 1000);
+  getGridIndexFromLabel(label) {
+    return this.state.tiles.findIndex( tile => tile.label === label);
   }
 
-  playableShuffledTiles() {
-    return this.state.shuffledTiles.filter( tile => {
-      const idx = this.state.playedTiles.findIndex( playedTile => playedTile.label === tile.label);
-      return idx < 0;
-    });
-  }
-
-  getGridCoordsFromLabel(label) {
+  getGridXYFromLabel(label) {
     const idx = this.state.tiles.findIndex( tile => tile.label === label);
     const x = (idx % COLUMNS) * WIDTH;
     const y = Math.floor(idx / COLUMNS) * HEIGHT;
@@ -73,31 +54,35 @@ class App extends Component {
   }
 
   getStartIndexFromLabel(label) {
-    return this.playableShuffledTiles().findIndex( tile => tile.label === label);
+    const playableTiles = this.state.shuffledTiles.filter( tile => {
+      const idx = this.state.playedTiles.findIndex( label => label === tile.label);
+      return idx < 0;
+    });
+    return playableTiles.findIndex( tile => tile.label === label);
   }
 
-  getStartCoordsFromLabel(label) {
+  getStartXYFromLabel(label) {
     const idx = this.getStartIndexFromLabel(label);
     const x = ( -idx + (COLUMNS - 1) ) * WIDTH;
     const y = STAGEHEIGHT - HEIGHT;
     return {x, y};
   }
 
-  setCoords(x, y) {
+  setXY(x, y) {
     this.setState({
       currentX: x,
       currentY: y
     })
   }
 
-  slotTile(tile) {
+  slotTile(label) {
     const arr = this.state.playedTiles.slice();
-    arr.push(tile);
+    arr.push(label);
     this.setState({playedTiles: arr});
   }
 
   slotIsHovered(label) {
-    const {x, y} = this.getGridCoordsFromLabel(label)
+    const {x, y} = this.getGridXYFromLabel(label)
     const entered = this.state.currentX > (x - WIDTH) && this.state.currentX < (x + WIDTH) &&
                     this.state.currentY > (y - HEIGHT) && this.state.currentY < (y + HEIGHT); 
     if (!entered || this.state.currentX === null || this.state.currentY === null) {
@@ -116,7 +101,7 @@ class App extends Component {
       <View style={{...rawStyles.base, paddingTop: TOPPAD, paddingBottom: BOTTOMPAD}}>
 
         {/* CLOCK */}
-        <Clock time={this.state.time} />
+        <Clock start={this.state.gameStarted && !gameComplete} paused={gameComplete} />
 
         <View style={styles.inner}>
 
@@ -137,6 +122,7 @@ class App extends Component {
           <FadeView
             fadeTo={ gameComplete ? 1 : 0}
             duration={gameComplete ? 300 : 0}
+            delay={gameComplete ? this.state.tiles.length * 50 + 500 : 0}
             styles={{...rawStyles.screen, zIndex: gameComplete ? 999 : 0}}
           >
             <Text style={styles.screenText}>congrats!</Text>
@@ -148,34 +134,40 @@ class App extends Component {
           {/* GRID OF SLOTS THAT TILES ARE MOVED ONTO */}
           {this.state.tiles.map( (tile, idx) =>
             <Slot
-              key={tile.label}
+              key={`slot_${tile.label}`}
+              idx={idx}
               width={WIDTH}
               height={HEIGHT}
-              {...this.getGridCoordsFromLabel(tile.label)}
-              isOdd={(idx + 1) % 2 === 1}
               label={tile.label}
+              {...this.getGridXYFromLabel(tile.label)}              
               isHovered={this.slotIsHovered(tile.label)}
-              slotted={this.state.playedTiles.includes(tile)}
+              slotted={this.state.playedTiles.includes(tile.label)}
             />
           )}
 
           {/* ROW OF MOVABLE TILES AT STARTING POSITION */}
           {this.state.tiles.map( (tile, idx) =>
             <Tile
-              key={tile.label}
+              key={`tile_${tile.label}`}
+              idx={this.getStartIndexFromLabel(tile.label)}
               width={WIDTH}
               height={HEIGHT}
-              {...this.getStartCoordsFromLabel(tile.label)}
               label={tile.label}
-              color={ this.getStartIndexFromLabel(tile.label) % 2 === 0 ? 'rgba(0,0,255,.7)': 'rgba(0,0,255,.8)'}
-              setCoords={this.setCoords}
-              targetCoords={this.getGridCoordsFromLabel(tile.label)}
-              targetIsHovered={() => this.slotIsHovered(tile.label)}
-              slotTile={() => this.slotTile(tile)}
-              canMove={!this.state.playedTiles.includes(tile)}
-              played={this.state.playedTiles.includes(tile)}
+              {...this.getStartXYFromLabel(tile.label)}              
+              setParentXY={this.setXY}
+              targetIndex={this.getGridIndexFromLabel(tile.label)}
+              targetXY={this.getGridXYFromLabel(tile.label)}
+              targetIsHovered={this.slotIsHovered}
+              slotTile={this.slotTile}
+              played={this.state.playedTiles.includes(tile.label)}
+              gameComplete={gameComplete}
             />
-          )}        
+          )}  
+
+          {/* CHECKERED PATTERN BENEATH BOTTOM ROW OF TILES */}  
+          {[...Array(10)].map( (item, idx) =>
+            <View key={`slot_stub${idx}`} pointerEvents="none" style={[styles.slotStub, {top: STAGEHEIGHT - HEIGHT, left: WIDTH * idx, width: WIDTH, height: HEIGHT, backgroundColor: idx % 2 === 1 ? 'rgba(0,0,0,.1)' : 'rgba(0,0,0,.05)'}]}></View>
+          )}
 
         </View>
 
