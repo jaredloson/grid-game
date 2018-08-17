@@ -6,5 +6,9 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1
+  },
+  text: {
+  	fontSize: 40,
+  	color: '#888'
   }
 });

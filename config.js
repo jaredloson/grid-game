@@ -1,8 +1,6 @@
 import { Dimensions } from 'react-native';
 import { isIphoneX } from './utils';
 
-console.log(isIphoneX());
-
 const TOPPAD = isIphoneX() ? 30 : 20;
 const BOTTOMPAD = isIphoneX() ? 23 : 0;
 const CLOCKHEIGHT = 30;

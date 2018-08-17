@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { View, Text } from 'react-native';
 import { styles } from './styles';
-import { CLOCKHEIGHT } from '../../config';
-
+import { CLOCKHEIGHT, TILES } from '../../config';
 
 class Clock extends Component {
 
@@ -14,7 +14,7 @@ class Clock extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.start && !prevProps.start) {
+    if (prevProps.paused && !this.props.paused) {
       this.setState({time: 0});
       this.setupInterval();
     } else if (this.props.paused && !prevProps.paused) {
@@ -23,6 +23,7 @@ class Clock extends Component {
   }
 
   setupInterval() {
+    clearInterval(this.interval);
     const self = this;
     this.interval = setInterval( () => {
       self.setState({time: self.state.time + 1000})
@@ -45,4 +46,6 @@ class Clock extends Component {
   }
 }
 
-export default Clock;
+const mapStateToProps = (state, ownProps) => ({paused: !state.gameStarted || state.playedTiles.length === TILES});
+
+export default connect(mapStateToProps, null)(Clock);
