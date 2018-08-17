@@ -160,41 +160,37 @@ class Tile extends Component {
 
 }
 
-const mapStateToProps = (state, ownProps) => {
+const getStartIndex = (state, props) => {
+  const playableTiles = state.shuffledTiles.filter( tile => !state.playedTiles.includes(tile.label) );
+  return playableTiles.findIndex( tile => tile.label === props.label );
+}
 
-  function getStartIndex() {
-    const playableTiles = state.shuffledTiles.filter( tile => !state.playedTiles.includes(tile.label) );
-    return playableTiles.findIndex( tile => tile.label === ownProps.label );
-  }
+const getStartXY = (state, props) => {
+  const idx = getStartIndex(state, props);
+  const x = ( -idx + (COLUMNS - 1) ) * WIDTH;
+  const y = STAGEHEIGHT - HEIGHT;
+  return {x, y};
+}
 
-  function getStartXY() {
-    const idx = getStartIndex();
-    const x = ( -idx + (COLUMNS - 1) ) * WIDTH;
-    const y = STAGEHEIGHT - HEIGHT;
-    return {x, y};
-  }
+const getTargetIndex = (state, props) => {
+  return state.tiles.findIndex( tile => tile.label === props.label);
+}
 
-  function getTargetIndex() {
-    return state.tiles.findIndex( tile => tile.label === ownProps.label);
-  }
+const getTargetXY = (state, props) => {
+  const idx = getTargetIndex(state, props);
+  const x = (idx % COLUMNS) * WIDTH;
+  const y = Math.floor(idx / COLUMNS) * HEIGHT;
+  return {x, y};
+}
 
-  function getTargetXY() {
-    const idx = getTargetIndex();
-    const x = (idx % COLUMNS) * WIDTH;
-    const y = Math.floor(idx / COLUMNS) * HEIGHT;
-    return {x, y};
-  }
-
-  return {
-    ...getStartXY(),
-    startIndex: getStartIndex(),
-    targetIndex: getTargetIndex(),
-    targetXY: getTargetXY(),
-    played: state.playedTiles.includes(ownProps.label),
-    gameComplete: state.playedTiles.length === TILES,
-  }
-
-};
+const mapStateToProps = (state, ownProps) => ({
+  ...getStartXY(state, ownProps),
+  startIndex: getStartIndex(state, ownProps),
+  targetIndex: getTargetIndex(state, ownProps),
+  targetXY: getTargetXY(state, ownProps),
+  played: state.playedTiles.includes(ownProps.label),
+  gameComplete: state.playedTiles.length === TILES,
+});
 
 const mapDispatchToProps = dispatch => ({
   setXY: (x, y) => dispatch({type: 'SET_XY', x, y}),
