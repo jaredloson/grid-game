@@ -27,6 +27,10 @@ export const rawStyles = {
     alignItems: 'center',
     justifyContent: 'center'
   },
+  screenComplete: {
+    top: 'auto',
+    backgroundColor: 'rgba(255,255,255,.75)'
+  },
   screenText: {
     fontSize: 40,
     color: '#333'
@@ -36,11 +40,11 @@ export const rawStyles = {
     height: 40,
     backgroundColor: 'blue',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 20
+    justifyContent: 'center'
   },
   buttonText: {
-    color: 'white'
+    color: 'white',
+    fontSize: 20
   },
   slotStub: {
     position: 'absolute',

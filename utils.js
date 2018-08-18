@@ -13,3 +13,7 @@ export const isIphoneX = () => {
   const { height, width } = d;
   return (Platform.OS === 'ios' && (height === 812 || width === 812));
 }
+
+export const propsChanged = (nextProps, thisProps, props) => {
+	return props.filter( prop => nextProps[prop] !== thisProps[prop] ).length > 0;
+}

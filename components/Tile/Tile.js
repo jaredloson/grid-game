@@ -3,7 +3,7 @@ import { View, Text, Dimensions, PanResponder, Animated, Easing } from 'react-na
 import { connect } from 'react-redux';
 import { styles } from './styles';
 import { STAGEWIDTH, STAGEHEIGHT, TILES, COLUMNS, WIDTH, HEIGHT } from '../../config';
-
+import { propsChanged } from '../../utils';
 
 class Tile extends Component {
 
@@ -31,10 +31,8 @@ class Tile extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    const coordsChanged = nextProps.x !== this.props.x || nextProps.y !== this.props.y;
-    const gameComplete = nextProps.gameComplete && !this.props.gameComplete;
-    const tilePlayed = nextProps.tilePlayed && !this.props.played;
-    return coordsChanged || gameComplete || tilePlayed || nextState !== this.state;
+    return propsChanged(nextProps, this.props, ['x', 'y', 'tilePlayed', 'gameComplete']) ||
+           nextState !== this.state;
   }
 
   componentDidUpdate(prevProps) {
@@ -42,20 +40,13 @@ class Tile extends Component {
   	const gameComplete = this.props.gameComplete;
     const tilePlayed = this.props.played && !prevProps.played;
     if (coordsChanged && !this.props.played) {
-  		this.animatePosition({x: this.props.x, y: this.props.y, duration: 250});	
+      const easing = prevProps.gameComplete && !this.props.gameComplete ? Easing.bounce : undefined;
+  		this.animatePosition({x: this.props.x, y: this.props.y, duration: 250, easing: easing});	
   	}
     if (this.props.gameComplete) {
       this.animateRotate(1, this.props.targetIndex * 50);
     } else if (!this.props.gameComplete && prevProps.gameComplete) {
       this.setState({rotate: new Animated.Value(0)});
-    }
-  }
-
-  getTileColor() {
-    if (this.props.played) {
-      return this.props.targetIndex % 2 === 0 ? 'rgb(0,160,0)': 'rgb(0,180,0)';
-    } else {
-      return this.props.startIndex % 2 === 0 ? 'rgb(0,0,200)': 'rgb(0,0,230)';
     }
   }
 
@@ -136,8 +127,9 @@ class Tile extends Component {
   	const style = {
   		width: this.props.width,
   		height: this.props.height,
-  		backgroundColor: this.getTileColor(),
-      transform: [{rotateY: rotation}]
+  		backgroundColor: this.props.played ? 'rgba(0,180,0,.75)' : 'rgba(0,0,255, .75)',
+      transform: [{rotateY: rotation}],
+      zIndex: this.state.dragging ? 1 : 0
   	}
     if (this.state.translate) {
       style.left = this.state.translate.x;
@@ -147,7 +139,7 @@ class Tile extends Component {
       style.top = this.state.y;
     }
     return (
-      <Animated.View style={[styles.base, style, {zIndex: this.state.dragging ? 1 : 0}]} {...this.panResponder.panHandlers}>
+      <Animated.View style={[styles.base, style]} {...this.panResponder.panHandlers}>
       	{!this.props.played &&
       		<View style={styles.help}>
             <Text style={styles.helpText}>drag me!</Text>

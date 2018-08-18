@@ -11,14 +11,8 @@ const Slot = (props) => {
     height: props.height,
     left: props.x,
     top: props.y,
-    backgroundColor: props.idx % 2 === 1 ? 'rgba(0,0,0,.1)' : 'rgba(0,0,0,.05)',
+    backgroundColor: props.isHovered ? 'rgba(0,0,0,.2)' : 'rgba(0,0,0,.0)',
     opacity: props.slotted ? 0 : 1
-  }
-  if (props.isHovered) {
-    style.backgroundColor = 'rgba(0,0,0,.25)';
-  }
-  if (props.slotted) {
-    style.backgroundColor = 'rgba(0,0,0,.25)';
   }
 
   return (

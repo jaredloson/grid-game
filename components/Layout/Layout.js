@@ -6,20 +6,38 @@ import Clock from '../Clock/Clock';
 import Slot from '../Slot/Slot';
 import Tile from '../Tile/Tile';
 import FadeView from '../../animators/FadeView';
-import { TOPPAD, BOTTOMPAD, STAGEWIDTH, STAGEHEIGHT, TILES, COLUMNS, WIDTH, HEIGHT } from '../../config';
-import { shuffle } from '../../utils';
+import { TOPPAD, BOTTOMPAD, STAGEWIDTH, STAGEHEIGHT, TILES, COLUMNS, ROWS, WIDTH, HEIGHT } from '../../config';
+import { shuffle, propsChanged } from '../../utils';
 
 class Layout extends Component {
+
+  shouldComponentUpdate(nextProps) {
+    return propsChanged(nextProps, this.props, ['showIntro', 'tiles', 'gameComplete']);
+  }
+
+  getStubPosition(idx) {
+    const left = (idx % COLUMNS) * WIDTH;
+    const top = Math.floor(idx / COLUMNS) * HEIGHT;
+    return {left, top};
+  }
+
+  getStubColor(idx) {
+    const offset = COLUMNS % 2 === 0 && Math.floor(idx / COLUMNS) % 2 === 0 ? 1 : 0;
+    const darkColor = (idx + offset) % 2 === 1;
+    return darkColor ? 'rgba(0,0,0,.15)' : 'rgba(0,0,0,.05)';
+  }
 
   render() {
 
     return (
       <View style={{...rawStyles.base, paddingTop: TOPPAD, paddingBottom: BOTTOMPAD}}>
 
-        {/* CLOCK */}
-        <Clock />
-
         <View style={styles.inner}>
+
+          {/* CHECKERED BACKGROUND PATTERN*/}  
+          {[...Array(TILES + COLUMNS)].map( (item, idx) =>
+            <View key={`slot_stub${idx}`} pointerEvents="none" style={[styles.slotStub, {...this.getStubPosition(idx), width: WIDTH, height: HEIGHT, backgroundColor: this.getStubColor(idx)}]}></View>
+          )}
 
           {/* INTRO SCREEN */}
           <FadeView
@@ -39,9 +57,8 @@ class Layout extends Component {
             fadeTo={ this.props.gameComplete ? 1 : 0}
             duration={this.props.gameComplete ? 300 : 0}
             delay={this.props.gameComplete ? this.props.tiles.length * 50 + 500 : 0}
-            styles={{...rawStyles.screen, zIndex: this.props.gameComplete ? 999 : 0}}
+            styles={{...rawStyles.screen, ...rawStyles.screenComplete, height: HEIGHT, zIndex: this.props.gameComplete ? 999 : 0}}
           >
-            <Text style={styles.screenText}>congrats!</Text>
             <TouchableOpacity activeOpacity={.5} onPress={this.props.setupGame} style={styles.button}>
               <Text style={styles.buttonText}>play again</Text>
             </TouchableOpacity>
@@ -58,7 +75,7 @@ class Layout extends Component {
             />
           )}
 
-          {/* ROW OF MOVABLE TILES AT STARTING POSITION */}
+          {/* ROW OF MOVABLE TILES */}
           {this.props.tiles.map( (tile, idx) =>
             <Tile
               key={`tile_${tile.label}`}
@@ -68,12 +85,10 @@ class Layout extends Component {
             />
           )}  
 
-          {/* CHECKERED PATTERN BENEATH BOTTOM ROW OF TILES */}  
-          {[...Array(COLUMNS)].map( (item, idx) =>
-            <View key={`slot_stub${idx}`} pointerEvents="none" style={[styles.slotStub, {top: STAGEHEIGHT - HEIGHT, left: WIDTH * idx, width: WIDTH, height: HEIGHT, backgroundColor: idx % 2 === 1 ? 'rgba(0,0,0,.1)' : 'rgba(0,0,0,.05)'}]}></View>
-          )}
-
         </View>
+
+        {/* CLOCK */}
+        <Clock />
 
       </View>
     );
