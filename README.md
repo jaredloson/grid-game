@@ -6,3 +6,6 @@ Playing around with React Native and a basic game/activity engine for dragging o
 	download the Expo XDE: https://docs.expo.io/versions/latest/introduction/installation
 	open the XDE, and then use "Open existing project" and point to the cloned repo
 	once the project is opened, click "Device" and then select the simulator on which to run the app
+
+## game config
+At the moment, many values that determine how the game is layed out are in `config.js`. For example, update the `const TILES` to change the number of tiles that get rendered.
