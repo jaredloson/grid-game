@@ -31,7 +31,7 @@ class Tile extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    return propsChanged(nextProps, this.props, ['x', 'y', 'tilePlayed', 'gameComplete']) ||
+    return propsChanged(nextProps, this.props, ['gameStarted', 'x', 'y', 'tilePlayed', 'gameComplete']) ||
            nextState !== this.state;
   }
 
@@ -180,6 +180,7 @@ const mapStateToProps = (state, ownProps) => ({
   startIndex: getStartIndex(state, ownProps),
   targetIndex: getTargetIndex(state, ownProps),
   targetXY: getTargetXY(state, ownProps),
+  gameStarted: state.gameStarted,
   played: state.playedTiles.includes(ownProps.label),
   gameComplete: state.playedTiles.length === TILES,
 });

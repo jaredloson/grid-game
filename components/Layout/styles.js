@@ -29,7 +29,7 @@ export const rawStyles = {
   },
   screenComplete: {
     top: 'auto',
-    backgroundColor: 'rgba(255,255,255,.75)'
+    backgroundColor: 'rgba(255,255,255,0)'
   },
   screenText: {
     fontSize: 40,
@@ -40,7 +40,11 @@ export const rawStyles = {
     height: 40,
     backgroundColor: 'blue',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    marginTop: 10
+  },
+  buttonSolo: {
+    marginTop: 0
   },
   buttonText: {
     color: 'white',

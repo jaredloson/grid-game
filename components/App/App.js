@@ -6,29 +6,32 @@ import { TILES } from '../../config';
 import { shuffle } from '../../utils';
 
 const initialState = {
-  showIntro: true,
   x: null,
   y: null,
   tiles: [],
   shuffledTiles: [],
   playedTiles: [],
-  gameStarted: false
+  gameStarted: false,
+  gamePaused: false
 }
 
 const reducer = (state = initialState, action) => {
   switch(action.type) {
 
     case 'SETUP_GAME':
-      const gameObject = {
-        showIntro: false,
+      const setupObject = {
         currentX: null,
         currentY: null,
         playedTiles: [],
-        gameStarted: true
+        gamePaused: false
       };
-      gameObject.tiles = state.tiles.length > 0 ? state.tiles : [...Array(TILES)].map( (item, idx) => ( {label: idx + 1} ));
-      gameObject.shuffledTiles = shuffle(gameObject.tiles.slice());
-      return {...state, ...gameObject};
+      setupObject.gameStarted = action.startGame
+      setupObject.tiles = state.tiles.length > 0 ? state.tiles : [...Array(TILES)].map( (item, idx) => ( {label: idx + 1} ));
+      setupObject.shuffledTiles = shuffle(setupObject.tiles.slice());
+      return {...state, ...setupObject};
+
+    case 'TOGGLE_PAUSE_GAME':
+      return {...state, gamePaused: !state.gamePaused}
 
     case 'SET_XY':
       return {...state, x: action.x, y: action.y}

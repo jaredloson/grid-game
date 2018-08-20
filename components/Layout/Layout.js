@@ -12,7 +12,7 @@ import { shuffle, propsChanged } from '../../utils';
 class Layout extends Component {
 
   shouldComponentUpdate(nextProps) {
-    return propsChanged(nextProps, this.props, ['showIntro', 'tiles', 'gameComplete']);
+    return propsChanged(nextProps, this.props, ['gameStarted', 'gamePaused', 'gameComplete', 'tiles']);
   }
 
   getStubPosition(idx) {
@@ -35,31 +35,45 @@ class Layout extends Component {
         <View style={styles.inner}>
 
           {/* CHECKERED BACKGROUND PATTERN*/}  
-          {[...Array(TILES + COLUMNS)].map( (item, idx) =>
+          {[...Array(ROWS * COLUMNS)].map( (item, idx) =>
             <View key={`slot_stub${idx}`} pointerEvents="none" style={[styles.slotStub, {...this.getStubPosition(idx), width: WIDTH, height: HEIGHT, backgroundColor: this.getStubColor(idx)}]}></View>
           )}
 
           {/* INTRO SCREEN */}
           <FadeView
-            fadeTo={ this.props.showIntro ? 1 : 0}
-            duration={300}
-            styles={{...rawStyles.screen, zIndex: this.props.showIntro ? 999 : 0}}
+            fadeTo={this.props.gameStarted ? 0 : 1}
+            duration={this.props.gameStarted ? 300 : 0}
+            styles={{...rawStyles.screen, zIndex: this.props.gameStarted ? 0 : 999}}
           >
             <Text style={styles.screenText}>welcome!</Text>
             <Text style={styles.screenTextSmall}></Text>
-            <TouchableOpacity activeOpacity={.5} onPress={this.props.setupGame} style={styles.button}>
+            <TouchableOpacity activeOpacity={.5} onPress={() => this.props.setupGame(true)} style={styles.button}>
               <Text style={styles.buttonText}>start</Text>
+            </TouchableOpacity>
+          </FadeView>
+
+          {/* GAME PAUSED SCREEN */}
+          <FadeView
+            fadeTo={this.props.gamePaused ? 1 : 0}
+            duration={this.props.gamePaused ? 300 : 0}
+            styles={{...rawStyles.screen, zIndex: this.props.gamePaused ? 999 : 0}}
+          >
+            <TouchableOpacity activeOpacity={.5} onPress={this.props.togglePauseGame} style={styles.button}>
+              <Text style={styles.buttonText}>resume game</Text>
+            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={.5} onPress={() => this.props.setupGame(false)} style={styles.button}>
+              <Text style={styles.buttonText}>cancel game</Text>
             </TouchableOpacity>
           </FadeView>
 
           {/* COMPLETE SCREEN */}
           <FadeView
-            fadeTo={ this.props.gameComplete ? 1 : 0}
+            fadeTo={this.props.gameComplete ? 1 : 0}
             duration={this.props.gameComplete ? 300 : 0}
             delay={this.props.gameComplete ? this.props.tiles.length * 50 + 500 : 0}
             styles={{...rawStyles.screen, ...rawStyles.screenComplete, height: HEIGHT, zIndex: this.props.gameComplete ? 999 : 0}}
           >
-            <TouchableOpacity activeOpacity={.5} onPress={this.props.setupGame} style={styles.button}>
+            <TouchableOpacity activeOpacity={.5} onPress={this.props.setupGame} style={[styles.button, styles.buttonSolo]}>
               <Text style={styles.buttonText}>play again</Text>
             </TouchableOpacity>
           </FadeView>
@@ -96,14 +110,16 @@ class Layout extends Component {
 }
 
 const mapStateToProps = (state, ownProps) => ({
-  showIntro: state.showIntro,
   tiles: state.tiles,
   playedTiles: state.playedTiles,
-  gameComplete: state.playedTiles.length === TILES
+  gameStarted: state.gameStarted,
+  gameComplete: state.playedTiles.length === TILES,
+  gamePaused: state.gamePaused
 });
 
 const mapDispatchToProps = dispatch => ({
-  setupGame: () => dispatch({type: 'SETUP_GAME'})
+  setupGame: (startGame) => dispatch({type: 'SETUP_GAME', startGame}),
+  togglePauseGame: () => dispatch({type: 'TOGGLE_PAUSE_GAME'})
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Layout);

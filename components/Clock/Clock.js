@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { View, Text } from 'react-native';
+import { TouchableOpacity, Text } from 'react-native';
 import { styles } from './styles';
 import { CLOCKHEIGHT, TILES } from '../../config';
 
@@ -11,14 +11,21 @@ class Clock extends Component {
     this.state = {
       time: 0
     }
+    this.togglePause = this.togglePause.bind(this);
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.paused && !this.props.paused) {
-      this.setState({time: 0});
+    const newGameStarted = !prevProps.gameStarted && this.props.gameStarted || prevProps.gameComplete && !this.props.gameComplete;
+    const gameComplete = !prevProps.gameComplete && this.props.gameComplete;
+    const gameCancelled = prevProps.gameStarted && !prevProps.gameComplete && !this.props.gameStarted;
+    if (newGameStarted) {
       this.setupInterval();
-    } else if (this.props.paused && !prevProps.paused) {
+    } 
+    if (gameComplete || gameCancelled) {
       clearInterval(this.interval);
+    } 
+    if (gameCancelled || newGameStarted) {
+      this.setState({time: 0});
     }
   }
 
@@ -26,7 +33,9 @@ class Clock extends Component {
     clearInterval(this.interval);
     const self = this;
     this.interval = setInterval( () => {
-      self.setState({time: self.state.time + 1000})
+      if (!self.props.paused) {
+        self.setState({time: self.state.time + 1000})
+      }
     }, 1000);
   }
 
@@ -37,15 +46,29 @@ class Clock extends Component {
     return `${String(mins).padStart(2, '0')} : ${String(secs).padStart(2, '0')}`
   }
 
+  togglePause() {
+    if (this.props.gameStarted) {
+      this.props.togglePauseGame();
+    }
+  }
+
   render() {
     return (
-      <View style={[styles.base, {height: CLOCKHEIGHT}]}>
-        <Text style={[styles.clock, {color: this.props.paused ? 'blue' : 'black' }]}>{this.getClockTime(this.state.time)}</Text>
-      </View>
+      <TouchableOpacity activeOpacity={.5} onPress={this.togglePause} style={[styles.base, {height: CLOCKHEIGHT}]}>
+        <Text style={[styles.clock, {color: this.props.gameComplete ? 'gray' : 'black' }]}>{this.getClockTime(this.state.time)}</Text>
+      </TouchableOpacity>
     );
   }
 }
 
-const mapStateToProps = (state, ownProps) => ({paused: !state.gameStarted || state.playedTiles.length === TILES});
+const mapStateToProps = (state, ownProps) => ({
+  gameStarted: state.gameStarted,
+  gameComplete: state.playedTiles.length === TILES,
+  paused: state.gamePaused
+});
 
-export default connect(mapStateToProps, null)(Clock);
+const mapDispatchToProps = dispatch => ({ 
+  togglePauseGame: () => dispatch({type: 'TOGGLE_PAUSE_GAME'}) 
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Clock);
