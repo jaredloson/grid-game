@@ -12,6 +12,7 @@ class Tile extends Component {
     this.state = {
     	x: props.x,
       y: props.y,
+      dragging: false,
       zIndex: props.zIndex,
       lastDx: 0,
       lastDy: 0,
@@ -22,7 +23,7 @@ class Tile extends Component {
     this.panResponder = PanResponder.create({
       onStartShouldSetPanResponder: (evt, gestureState) => false,
       onStartShouldSetPanResponderCapture: (evt, gestureState) => false,
-      onMoveShouldSetPanResponder: (evt, gestureState) => !this.props.played,
+      onMoveShouldSetPanResponder: (evt, gestureState) => !this.props.gameComplete,
       onMoveShouldSetPanResponderCapture: (evt, gestureState) => false,
       onPanResponderMove: (evt, gestureState) => this.handleResponderMove(gestureState),
       onPanResponderRelease: (evt, gestureState) => this.handleResponderRelease(gestureState)
@@ -36,7 +37,7 @@ class Tile extends Component {
   }
 
   componentDidUpdate(prevProps) {
-  	const coordsChanged = prevProps.x !== this.props.x || prevProps.y !== this.props.y;
+  	const coordsChanged = (prevProps.x !== this.props.x || prevProps.y !== this.props.y) && !this.state.dragging;
   	const gameComplete = this.props.gameComplete;
     const tilePlayed = this.props.played && !prevProps.played;
     if (coordsChanged && !this.props.played) {
@@ -74,7 +75,11 @@ class Tile extends Component {
     	y: y,
     	lastDx: gestureState.dx,
     	lastDy: gestureState.dy,
-    	dragging: true
+      dragging: true
+    }, () => {
+      if (this.props.played) {
+        this.props.toggleSlotTile(this.props.label);
+      }
     });
     this.props.setXY(x, y);
   }
@@ -82,7 +87,8 @@ class Tile extends Component {
   handleResponderRelease(gestureState) {
   	this.setState({
     	lastDx: 0,
-    	lastDy: 0
+    	lastDy: 0,
+      dragging: false
     });
     const onTarget = this.targetIsHovered(this.props.label);
     const xy = onTarget ? this.props.targetXY : {x: this.props.x, y: this.props.y};
@@ -103,9 +109,9 @@ class Tile extends Component {
 	      easing: easing,
 	      duration: duration
 	    }).start( () => {
-	      this.setState({x, y, translate: null, dragging: false});
+	      this.setState({x, y, translate: null});
 	     	if (slotTile) {
-    			this.props.slotTile(this.props.label);
+    			this.props.toggleSlotTile(this.props.label);
     		}
 	    });
   	}, 0);
@@ -129,7 +135,7 @@ class Tile extends Component {
   		height: this.props.height,
   		backgroundColor: this.props.played ? 'rgba(0,180,0,.75)' : 'rgba(0,0,255, .75)',
       transform: [{rotateY: rotation}],
-      zIndex: this.state.dragging ? 1 : 0
+      zIndex: this.state.dragging ? 2 : 1
   	}
     if (this.state.translate) {
       style.left = this.state.translate.x;
@@ -182,12 +188,12 @@ const mapStateToProps = (state, ownProps) => ({
   targetXY: getTargetXY(state, ownProps),
   gameStarted: state.gameStarted,
   played: state.playedTiles.includes(ownProps.label),
-  gameComplete: state.playedTiles.length === TILES,
+  gameComplete: state.playedTiles.length === TILES
 });
 
 const mapDispatchToProps = dispatch => ({
   setXY: (x, y) => dispatch({type: 'SET_XY', x, y}),
-  slotTile: (tileLabel) => dispatch({type: 'SLOT_TILE', tileLabel})
+  toggleSlotTile: (tileLabel) => dispatch({type: 'TOGGLE_SLOT_TILE', tileLabel})
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Tile);

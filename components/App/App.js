@@ -20,8 +20,8 @@ const reducer = (state = initialState, action) => {
 
     case 'SETUP_GAME':
       const setupObject = {
-        currentX: null,
-        currentY: null,
+        x: null,
+        y: null,
         playedTiles: [],
         gamePaused: false
       };
@@ -36,11 +36,18 @@ const reducer = (state = initialState, action) => {
     case 'SET_XY':
       return {...state, x: action.x, y: action.y}
 
-    case 'SLOT_TILE':
-      if (state.playedTiles.includes(action.tileLabel)) {
-        return state;
+    case 'TOGGLE_SLOT_TILE':
+      const idx = state.playedTiles.indexOf(action.tileLabel);
+      if (idx > -1) {
+        return {...state, playedTiles: [
+          ...state.playedTiles.slice(0, idx),
+          ...state.playedTiles.slice(idx + 1)
+        ]};
       } else {
-        return {...state, playedTiles: [...state.playedTiles, action.tileLabel] }
+        return {...state, playedTiles: [
+          ...state.playedTiles,
+          action.tileLabel
+        ]};
       }
 
     default:
