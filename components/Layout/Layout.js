@@ -11,6 +11,10 @@ import { shuffle, propsChanged } from '../../utils';
 
 class Layout extends Component {
 
+  constructor(){
+    super();
+  }
+
   shouldComponentUpdate(nextProps) {
     return propsChanged(nextProps, this.props, ['gameStarted', 'gamePaused', 'gameComplete', 'tiles']);
   }
@@ -93,6 +97,7 @@ class Layout extends Component {
           {this.props.tiles.map( (tile, idx) =>
             <Tile
               key={`tile_${tile.label}`}
+              id={idx}
               width={WIDTH}
               height={HEIGHT}
               label={tile.label}

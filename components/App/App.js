@@ -4,6 +4,7 @@ import { createStore } from 'redux';
 import Layout from '../Layout/Layout';
 import { TILES } from '../../config';
 import { shuffle } from '../../utils';
+import slowlog from 'react-native-slowlog';
 
 const initialState = {
   x: null,
@@ -52,6 +53,11 @@ const reducer = (state = initialState, action) => {
 const store = createStore(reducer);
 
 class App extends Component {
+  constructor(){
+    super();
+    // slowlog(this, /.*/);
+  }
+
   render() {
     return (
       <Provider store={store}>

@@ -120,6 +120,7 @@ class Tile extends Component {
   }
   
   render() {
+    // console.log(`Tile ${this.props.id} rendered ${this.props.renderCount} ${this.props.renderCount == 1 ? 'time' : 'times'}`);
     const rotation = this.state.rotate.interpolate({
       inputRange: [0, 1],
       outputRange: ['0deg', '360deg']
@@ -190,4 +191,4 @@ const mapDispatchToProps = dispatch => ({
   slotTile: (tileLabel) => dispatch({type: 'SLOT_TILE', tileLabel})
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(Tile);
+export default connect(mapStateToProps, mapDispatchToProps, null, { renderCountProp: `renderCount` })(Tile);
