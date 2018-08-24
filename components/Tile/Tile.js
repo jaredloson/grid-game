@@ -4,11 +4,13 @@ import { connect } from 'react-redux';
 import { styles } from './styles';
 import { STAGEWIDTH, STAGEHEIGHT, TILES, COLUMNS, WIDTH, HEIGHT } from '../../config';
 import { propsChanged } from '../../utils';
+import {setTileXY, slotTile} from '../../redux/actions/actionCreators';
 
 class Tile extends Component {
 
 	constructor(props) {
     super(props);
+    console.log(props);
     this.state = {
     	x: props.x,
       y: props.y,
@@ -76,7 +78,7 @@ class Tile extends Component {
     	lastDy: gestureState.dy,
     	dragging: true
     });
-    this.props.setXY(x, y);
+    this.props.setTileXY(x, y);
   }
 
   handleResponderRelease(gestureState) {
@@ -88,7 +90,7 @@ class Tile extends Component {
     const xy = onTarget ? this.props.targetXY : {x: this.props.x, y: this.props.y};
     const duration = onTarget ? 250 : 500;
     this.animatePosition({...xy, duration, easing: onTarget ? undefined : Easing.bounce, slotTile: onTarget});
-    this.props.setXY(null, null);
+    this.props.setTileXY(null, null);
   }
 
   animatePosition({x, y, duration, easing = Easing.bezier(0.86, 0, 0.07, 1), slotTile = false}) {
@@ -185,9 +187,24 @@ const mapStateToProps = (state, ownProps) => ({
   gameComplete: state.playedTiles.length === TILES,
 });
 
-const mapDispatchToProps = dispatch => ({
-  setXY: (x, y) => dispatch({type: 'SET_XY', x, y}),
-  slotTile: (tileLabel) => dispatch({type: 'SLOT_TILE', tileLabel})
-});
+//CONNECT
+//OPTION 1: use mapDispatchToProps
+// the advantage here is that we have the action creators here, visible and editable alongside
+// our code where it is used
 
-export default connect(mapStateToProps, mapDispatchToProps)(Tile);
+// const mapDispatchToProps = dispatch => ({
+//   setTileXY: (x, y) => dispatch({type: 'SET_XY', x, y}),
+//   slotTile: (tileLabel) => dispatch({type: 'SLOT_TILE', tileLabel})
+// });
+
+// export default connect(mapStateToProps, mapDispatchToProps)(Tile);
+
+//OPTION 2: Extract to actionCreators.js
+//We're abstracting the action creators into a single place to separate the concerns and
+//be able to track down our actions together
+console.log(setTileXY);
+export default connect(mapStateToProps, {setTileXY, slotTile})(Tile);
+
+//OPTION 3: use bindActionCreators inside of mapDispatchToProps
+//Apparently is frowned upon unless you're trying just to pass all your actions down as children
+//Read more: https://redux.js.org/api/bindactioncreators
