@@ -12,6 +12,20 @@ export function setTileXY(x, y){
 export function slotTile(tileLabel){
     return {
         type: SLOT_TILE,
-        tileLabel
+        tileLabel,
+    };
+}
+
+//Layout Action Creators
+export function setupGame(startGame){
+    return {
+        type: SETUP_GAME,
+        startGame,
+    };
+}
+
+export function togglePauseGame(){
+    return {
+        type: TOGGLE_PAUSE_GAME,
     };
 }

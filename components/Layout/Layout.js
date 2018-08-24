@@ -7,7 +7,8 @@ import Slot from '../Slot/Slot';
 import Tile from '../Tile/Tile';
 import FadeView from '../../animators/FadeView';
 import { TOPPAD, BOTTOMPAD, STAGEWIDTH, STAGEHEIGHT, TILES, COLUMNS, ROWS, WIDTH, HEIGHT } from '../../config';
-import { shuffle, propsChanged } from '../../utils';
+import { propsChanged } from '../../utils';
+import {setupGame, togglePauseGame} from '../../redux/actions/actionCreators';
 
 class Layout extends Component {
 
@@ -117,9 +118,4 @@ const mapStateToProps = (state, ownProps) => ({
   gamePaused: state.gamePaused
 });
 
-const mapDispatchToProps = dispatch => ({
-  setupGame: (startGame) => dispatch({type: 'SETUP_GAME', startGame}),
-  togglePauseGame: () => dispatch({type: 'TOGGLE_PAUSE_GAME'})
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(Layout);
+export default connect(mapStateToProps, {setupGame, togglePauseGame})(Layout);
