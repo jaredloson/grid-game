@@ -30,22 +30,9 @@ const mapStateToProps = (state, ownProps) => {
     return {x, y};
   }
 
-  function isHovered() {
-    const {x, y} = getXY();
-    const entered = state.x > (x - WIDTH) && state.x < (x + WIDTH) &&
-                    state.y > (y - HEIGHT) && state.y < (y + HEIGHT); 
-    if (!entered || state.x === null || state.y === null) {
-      return false;
-    }
-    const hoveredWidth = WIDTH - (Math.abs(state.x - x));
-    const hoveredHeight = HEIGHT - (Math.abs(state.y - y));
-    return (hoveredWidth * hoveredHeight) >= (WIDTH * HEIGHT * .5);
-  }
-
   return {
     ...getXY(),
-    isHovered: isHovered(),
-    slotted: state.playedTiles.includes(ownProps.label)
+    isHovered: state.hoveredSlot === ownProps.label
   }
 
 };

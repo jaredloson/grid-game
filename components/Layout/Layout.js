@@ -111,9 +111,8 @@ class Layout extends Component {
 
 const mapStateToProps = (state, ownProps) => ({
   tiles: state.tiles,
-  playedTiles: state.playedTiles,
   gameStarted: state.gameStarted,
-  gameComplete: state.playedTiles.length === TILES,
+  gameComplete: state.slottedTiles.length === TILES,
   gamePaused: state.gamePaused
 });
 

@@ -39,8 +39,9 @@ class Tile extends Component {
   componentDidUpdate(prevProps) {
   	const coordsChanged = (prevProps.x !== this.props.x || prevProps.y !== this.props.y) && !this.state.dragging;
   	const gameComplete = this.props.gameComplete;
-    const tilePlayed = this.props.played && !prevProps.played;
-    if (coordsChanged && !this.props.played) {
+    const tilePlayed = this.props.playedSlot && !prevProps.playedSlot;
+    if (coordsChanged && !this.props.playedSlot) {
+      console.log(this.props.label);
       const easing = prevProps.gameComplete && !this.props.gameComplete ? Easing.bounce : undefined;
   		this.animatePosition({x: this.props.x, y: this.props.y, duration: 250, easing: easing});	
   	}
@@ -51,8 +52,17 @@ class Tile extends Component {
     }
   }
 
-  targetIsHovered() {
-    const {x, y} = this.props.targetXY;
+  getSlotIdx(label) {
+    return this.props.tiles.findIndex( tile => tile.label === label);
+  }
+
+  getSlotXY(idx) {
+    const x = (idx % COLUMNS) * WIDTH;
+    const y = Math.floor(idx / COLUMNS) * HEIGHT;
+    return {x, y}
+  }
+
+  slotIsHovered(x, y) {
     const entered = this.state.x > (x - WIDTH) && this.state.x < (x + WIDTH) &&
                     this.state.y > (y - HEIGHT) && this.state.y < (y + HEIGHT); 
     if (!entered || this.state.x === null || this.state.y === null) {
@@ -61,6 +71,17 @@ class Tile extends Component {
     const hoveredWidth = WIDTH - (Math.abs(this.state.x - x));
     const hoveredHeight = HEIGHT - (Math.abs(this.state.y - y));
     return (hoveredWidth * hoveredHeight) >= (WIDTH * HEIGHT * .5);
+  }
+
+  setHovered() {
+    let hoveredSlot = null;
+    this.props.tiles.forEach( (tile, idx) => {
+      const {x, y} = this.getSlotXY(idx);
+      if (this.slotIsHovered(x, y) && this.props.slottedTiles.findIndex( node => node.slot === tile.label ) === -1) {
+        hoveredSlot = tile.label;
+      }
+    });
+    this.props.setHoveredSlot(hoveredSlot, this.props.label);
   }
 
   handleResponderMove(gestureState) {
@@ -77,44 +98,44 @@ class Tile extends Component {
     	lastDy: gestureState.dy,
       dragging: true
     }, () => {
-      if (this.props.played) {
-        this.props.toggleSlotTile(this.props.label);
+      if (this.props.playedSlot) {
+        const idx = this.props.slottedTiles.findIndex( node => node.tile === this.props.label );
+        const node = this.props.slottedTiles[idx];
+        this.props.toggleSlotTile(node.slot, this.props.label);
       }
     });
-    this.props.setXY(x, y);
+    this.setHovered();
   }
 
   handleResponderRelease(gestureState) {
+    const hoveredSlot = this.props.hoveredSlot;
   	this.setState({
     	lastDx: 0,
     	lastDy: 0,
       dragging: false
     });
-    const onTarget = this.targetIsHovered(this.props.label);
-    const xy = onTarget ? this.props.targetXY : {x: this.props.x, y: this.props.y};
-    const duration = onTarget ? 250 : 500;
-    this.animatePosition({...xy, duration, easing: onTarget ? undefined : Easing.bounce, slotTile: onTarget});
-    this.props.setXY(null, null);
+    const xy = this.props.hoveredSlot ? this.getSlotXY(this.getSlotIdx(this.props.hoveredSlot)) : {x: this.props.x, y: this.props.y};
+    const duration = this.props.hoveredSlot ? 250 : 500;
+    this.animatePosition({...xy, duration, easing: this.props.hoveredSlot ? undefined : Easing.bounce});
   }
 
-  animatePosition({x, y, duration, easing = Easing.bezier(0.86, 0, 0.07, 1), slotTile = false}) {
+  animatePosition({x, y, duration, easing = Easing.bezier(0.86, 0, 0.07, 1)}) {
   	const translate = new Animated.ValueXY({
       x: this.state.x,
       y: this.state.y
     });
-  	this.setState({translate});
-  	setTimeout( () => {
-  		Animated.timing(this.state.translate, {
-	      toValue: {x, y},
-	      easing: easing,
-	      duration: duration
-	    }).start( () => {
-	      this.setState({x, y, translate: null});
-	     	if (slotTile) {
-    			this.props.toggleSlotTile(this.props.label);
-    		}
-	    });
-  	}, 0);
+  	this.setState({translate}, () => {
+      Animated.timing(this.state.translate, {
+        toValue: {x, y},
+        easing: easing,
+        duration: duration
+      }).start( () => {
+        this.setState({x, y, translate: null});
+        if (this.props.hoveredSlot) {
+          //this.props.toggleSlotTile(this.props.hoveredSlot, this.props.label);
+        }
+      });
+    });
   }
 
   animateRotate(value, delay) {
@@ -133,7 +154,7 @@ class Tile extends Component {
   	const style = {
   		width: this.props.width,
   		height: this.props.height,
-  		backgroundColor: this.props.played ? 'rgba(0,180,0,.75)' : 'rgba(0,0,255, .75)',
+  		backgroundColor: this.props.playedSlot ? 'rgba(0,180,0,.75)' : 'rgba(0,0,255, .75)',
       transform: [{rotateY: rotation}],
       zIndex: this.state.dragging ? 2 : 1
   	}
@@ -146,7 +167,7 @@ class Tile extends Component {
     }
     return (
       <Animated.View style={[styles.base, style]} {...this.panResponder.panHandlers}>
-      	{!this.props.played &&
+      	{!this.props.playedSlot &&
       		<View style={styles.help}>
             <Text style={styles.helpText}>drag me!</Text>
           </View>
@@ -158,42 +179,34 @@ class Tile extends Component {
 
 }
 
-const getStartIndex = (state, props) => {
-  const playableTiles = state.shuffledTiles.filter( tile => !state.playedTiles.includes(tile.label) );
-  return playableTiles.findIndex( tile => tile.label === props.label );
+const getStartIdx = (state, props) => {
+  const playableTiles = state.shuffledTiles.filter( label => {
+    const idx = state.slottedTiles.findIndex( node => node.tile === label );
+    return idx === -1;
+  });
+  return playableTiles.indexOf(props.label);
 }
 
-const getStartXY = (state, props) => {
-  const idx = getStartIndex(state, props);
+const getXY = (state, props) => {  
+  const idx = getStartIdx(state, props);
   const x = ( -idx + (COLUMNS - 1) ) * WIDTH;
   const y = STAGEHEIGHT - HEIGHT;
   return {x, y};
 }
 
-const getTargetIndex = (state, props) => {
-  return state.tiles.findIndex( tile => tile.label === props.label);
-}
-
-const getTargetXY = (state, props) => {
-  const idx = getTargetIndex(state, props);
-  const x = (idx % COLUMNS) * WIDTH;
-  const y = Math.floor(idx / COLUMNS) * HEIGHT;
-  return {x, y};
-}
-
 const mapStateToProps = (state, ownProps) => ({
-  ...getStartXY(state, ownProps),
-  startIndex: getStartIndex(state, ownProps),
-  targetIndex: getTargetIndex(state, ownProps),
-  targetXY: getTargetXY(state, ownProps),
+  ...getXY(state, ownProps),
+  tiles: state.tiles,
+  slottedTiles: state.slottedTiles,
   gameStarted: state.gameStarted,
-  played: state.playedTiles.includes(ownProps.label),
-  gameComplete: state.playedTiles.length === TILES
+  playedSlot: state.slottedTiles.findIndex( node => node.tile === ownProps.label ) > -1,
+  gameComplete: state.slottedTiles.length === TILES,
+  hoveredSlot: state.hoveredSlot.tile === ownProps.label
 });
 
 const mapDispatchToProps = dispatch => ({
-  setXY: (x, y) => dispatch({type: 'SET_XY', x, y}),
-  toggleSlotTile: (tileLabel) => dispatch({type: 'TOGGLE_SLOT_TILE', tileLabel})
+  toggleSlotTile: (slotLabel, tileLabel) => dispatch({type: 'TOGGLE_SLOT_TILE', slotLabel, tileLabel}),
+  setHoveredSlot: (slotLabel, tileLabel) => dispatch({type: 'SET_HOVERED_SLOT', slotLabel, tileLabel})
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Tile);

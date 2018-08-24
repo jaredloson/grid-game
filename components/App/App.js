@@ -6,48 +6,59 @@ import { TILES } from '../../config';
 import { shuffle } from '../../utils';
 
 const initialState = {
-  x: null,
-  y: null,
+  hoveredSlot: {slot: null, tile: null},
   tiles: [],
   shuffledTiles: [],
-  playedTiles: [],
   gameStarted: false,
-  gamePaused: false
+  gamePaused: false,
+  slottedTiles: []
 }
 
 const reducer = (state = initialState, action) => {
   switch(action.type) {
 
     case 'SETUP_GAME':
-      const setupObject = {
-        x: null,
-        y: null,
-        playedTiles: [],
-        gamePaused: false
-      };
+      const setupObject = initialState;
       setupObject.gameStarted = action.startGame
-      setupObject.tiles = state.tiles.length > 0 ? state.tiles : [...Array(TILES)].map( (item, idx) => ( {label: idx + 1} ));
-      setupObject.shuffledTiles = shuffle(setupObject.tiles.slice());
+      setupObject.tiles = [...Array(TILES)].map( (item, idx) => ( {label: idx + 1, child: null} ));
+      setupObject.shuffledTiles = shuffle(setupObject.tiles.slice()).map( tile => tile.label );
       return {...state, ...setupObject};
 
     case 'TOGGLE_PAUSE_GAME':
       return {...state, gamePaused: !state.gamePaused}
 
-    case 'SET_XY':
-      return {...state, x: action.x, y: action.y}
+    case 'SET_HOVERED_SLOT': 
+      return {
+        ...state,
+        hoveredSlot: {slot: action.slotLabel, tile: action.tileLabel}
+      }
 
     case 'TOGGLE_SLOT_TILE':
-      const idx = state.playedTiles.indexOf(action.tileLabel);
-      if (idx > -1) {
-        return {...state, playedTiles: [
-          ...state.playedTiles.slice(0, idx),
-          ...state.playedTiles.slice(idx + 1)
-        ]};
+      const idx = state.slottedTiles.findIndex( node => node.slot === action.slotLabel );
+      const shuffledIdx = state.shuffledTiles.indexOf(action.tileLabel);
+      if (idx === -1) {
+        return {
+          ...state,
+          slottedTiles: [
+            ...state.slottedTiles,
+            {slot: action.slotLabel, tile: action.tileLabel}
+          ],
+          shuffledTiles: [
+            action.tileLabel,
+            ...state.shuffledTiles.slice(0, shuffledIdx),
+            ...state.shuffledTiles.slice(shuffledIdx + 1)
+          ],
+          hoveredSlot: {slot: null, tile: null}
+        }
       } else {
-        return {...state, playedTiles: [
-          ...state.playedTiles,
-          action.tileLabel
-        ]};
+        return {
+          ...state,
+          slottedTiles: [
+            ...state.slottedTiles.slice(0, idx),
+            ...state.slottedTiles.slice(idx + 1)
+          ],
+          hoveredSlot: {slot: null, tile: null}
+        }
       }
 
     default:
