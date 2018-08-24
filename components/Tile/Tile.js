@@ -5,12 +5,12 @@ import { styles } from './styles';
 import { STAGEWIDTH, STAGEHEIGHT, TILES, COLUMNS, WIDTH, HEIGHT } from '../../config';
 import { propsChanged } from '../../utils';
 import {setTileXY, slotTile} from '../../redux/actions/actionCreators';
+import {getStartIndex, getTargetIndex, getTargetXY, getStartXY, getIsPlayed, getGameComplete} from '../../redux/selectors/index';
 
 class Tile extends Component {
 
 	constructor(props) {
     super(props);
-    console.log(props);
     this.state = {
     	x: props.x,
       y: props.y,
@@ -154,37 +154,39 @@ class Tile extends Component {
 
 }
 
-const getStartIndex = (state, props) => {
-  const playableTiles = state.shuffledTiles.filter( tile => !state.playedTiles.includes(tile.label) );
-  return playableTiles.findIndex( tile => tile.label === props.label );
-}
+// const getStartIndex = (state, props) => {
+//   const playableTiles = state.shuffledTiles.filter( tile => !state.playedTiles.includes(tile.label) );
+//   return playableTiles.findIndex( tile => tile.label === props.label );
+// }
 
-const getStartXY = (state, props) => {
-  const idx = getStartIndex(state, props);
-  const x = ( -idx + (COLUMNS - 1) ) * WIDTH;
-  const y = STAGEHEIGHT - HEIGHT;
-  return {x, y};
-}
+// const getStartXY = (state, props) => {
+//   const idx = getStartIndex(state, props);
+//   const x = ( -idx + (COLUMNS - 1) ) * WIDTH;
+//   const y = STAGEHEIGHT - HEIGHT;
+//   return {x, y};
+// }
 
-const getTargetIndex = (state, props) => {
-  return state.tiles.findIndex( tile => tile.label === props.label);
-}
+// const getTargetIndex = (state, props) => {
+//   return state.tiles.findIndex( tile => tile.label === props.label);
+// }
 
-const getTargetXY = (state, props) => {
-  const idx = getTargetIndex(state, props);
-  const x = (idx % COLUMNS) * WIDTH;
-  const y = Math.floor(idx / COLUMNS) * HEIGHT;
-  return {x, y};
-}
+// const getTargetXY = (state, props) => {
+//   const idx = getTargetIndex(state, props);
+//   const x = (idx % COLUMNS) * WIDTH;
+//   const y = Math.floor(idx / COLUMNS) * HEIGHT;
+//   return {x, y};
+// }
 
+//We're using selectors for this, since this is run EVERY time a state mutation occurs
+//which can be really taxing since this involves calculations
 const mapStateToProps = (state, ownProps) => ({
   ...getStartXY(state, ownProps),
   startIndex: getStartIndex(state, ownProps),
   targetIndex: getTargetIndex(state, ownProps),
   targetXY: getTargetXY(state, ownProps),
   gameStarted: state.gameStarted,
-  played: state.playedTiles.includes(ownProps.label),
-  gameComplete: state.playedTiles.length === TILES,
+  played: getIsPlayed(state, ownProps),
+  gameComplete: getGameComplete(state, ownProps),
 });
 
 //CONNECT
@@ -202,7 +204,7 @@ const mapStateToProps = (state, ownProps) => ({
 //OPTION 2: Extract to actionCreators.js
 //We're abstracting the action creators into a single place to separate the concerns and
 //be able to track down our actions together
-console.log(setTileXY);
+console.log('tesst');
 export default connect(mapStateToProps, {setTileXY, slotTile})(Tile);
 
 //OPTION 3: use bindActionCreators inside of mapDispatchToProps
