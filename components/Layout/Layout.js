@@ -96,6 +96,7 @@ class Layout extends Component {
               width={WIDTH}
               height={HEIGHT}
               label={tile.label}
+              targetIndex={idx}
             />
           )}  
 
@@ -112,7 +113,7 @@ class Layout extends Component {
 const mapStateToProps = (state, ownProps) => ({
   tiles: state.tiles,
   gameStarted: state.gameStarted,
-  gameComplete: state.slottedTiles.length === TILES,
+  gameComplete: state.slottedTiles.filter( node => node.slot === node.tile ).length === TILES,
   gamePaused: state.gamePaused
 });
 

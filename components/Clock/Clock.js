@@ -63,7 +63,7 @@ class Clock extends Component {
 
 const mapStateToProps = (state, ownProps) => ({
   gameStarted: state.gameStarted,
-  gameComplete: state.slottedTiles.length === TILES,
+  gameComplete: state.slottedTiles.filter( node => node.slot === node.tile ).length === TILES,
   paused: state.gamePaused
 });
 

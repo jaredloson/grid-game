@@ -41,7 +41,6 @@ class Tile extends Component {
   	const gameComplete = this.props.gameComplete;
     const tilePlayed = this.props.playedSlot && !prevProps.playedSlot;
     if (coordsChanged && !this.props.playedSlot) {
-      console.log(this.props.label);
       const easing = prevProps.gameComplete && !this.props.gameComplete ? Easing.bounce : undefined;
   		this.animatePosition({x: this.props.x, y: this.props.y, duration: 250, easing: easing});	
   	}
@@ -81,7 +80,9 @@ class Tile extends Component {
         hoveredSlot = tile.label;
       }
     });
-    this.props.setHoveredSlot(hoveredSlot, this.props.label);
+    if (hoveredSlot !== this.props.hoveredSlot) {
+      this.props.setHoveredSlot(hoveredSlot);  
+    } 
   }
 
   handleResponderMove(gestureState) {
@@ -101,14 +102,13 @@ class Tile extends Component {
       if (this.props.playedSlot) {
         const idx = this.props.slottedTiles.findIndex( node => node.tile === this.props.label );
         const node = this.props.slottedTiles[idx];
-        this.props.toggleSlotTile(node.slot, this.props.label);
+        this.props.unSlotTile(node.slot);
       }
     });
     this.setHovered();
   }
 
   handleResponderRelease(gestureState) {
-    const hoveredSlot = this.props.hoveredSlot;
   	this.setState({
     	lastDx: 0,
     	lastDy: 0,
@@ -116,10 +116,10 @@ class Tile extends Component {
     });
     const xy = this.props.hoveredSlot ? this.getSlotXY(this.getSlotIdx(this.props.hoveredSlot)) : {x: this.props.x, y: this.props.y};
     const duration = this.props.hoveredSlot ? 250 : 500;
-    this.animatePosition({...xy, duration, easing: this.props.hoveredSlot ? undefined : Easing.bounce});
+    this.animatePosition({...xy, duration, easing: this.props.hoveredSlot ? undefined : Easing.bounce, slotTile: this.props.hoveredSlot});
   }
 
-  animatePosition({x, y, duration, easing = Easing.bezier(0.86, 0, 0.07, 1)}) {
+  animatePosition({x, y, duration, easing = Easing.bezier(0.86, 0, 0.07, 1), slotTile = false}) {
   	const translate = new Animated.ValueXY({
       x: this.state.x,
       y: this.state.y
@@ -131,8 +131,8 @@ class Tile extends Component {
         duration: duration
       }).start( () => {
         this.setState({x, y, translate: null});
-        if (this.props.hoveredSlot) {
-          //this.props.toggleSlotTile(this.props.hoveredSlot, this.props.label);
+        if (slotTile) {
+          this.props.slotTile(this.props.hoveredSlot, this.props.label);
         }
       });
     });
@@ -154,7 +154,7 @@ class Tile extends Component {
   	const style = {
   		width: this.props.width,
   		height: this.props.height,
-  		backgroundColor: this.props.playedSlot ? 'rgba(0,180,0,.75)' : 'rgba(0,0,255, .75)',
+  		backgroundColor: this.props.gameComplete ? 'rgba(0,180,0,.75)' : 'rgba(0,0,255, .75)',
       transform: [{rotateY: rotation}],
       zIndex: this.state.dragging ? 2 : 1
   	}
@@ -167,7 +167,7 @@ class Tile extends Component {
     }
     return (
       <Animated.View style={[styles.base, style]} {...this.panResponder.panHandlers}>
-      	{!this.props.playedSlot &&
+      	{!this.props.gameComplete &&
       		<View style={styles.help}>
             <Text style={styles.helpText}>drag me!</Text>
           </View>
@@ -200,13 +200,14 @@ const mapStateToProps = (state, ownProps) => ({
   slottedTiles: state.slottedTiles,
   gameStarted: state.gameStarted,
   playedSlot: state.slottedTiles.findIndex( node => node.tile === ownProps.label ) > -1,
-  gameComplete: state.slottedTiles.length === TILES,
-  hoveredSlot: state.hoveredSlot.tile === ownProps.label
+  gameComplete: state.slottedTiles.filter( node => node.slot === node.tile ).length === TILES,
+  hoveredSlot: state.hoveredSlot
 });
 
 const mapDispatchToProps = dispatch => ({
-  toggleSlotTile: (slotLabel, tileLabel) => dispatch({type: 'TOGGLE_SLOT_TILE', slotLabel, tileLabel}),
-  setHoveredSlot: (slotLabel, tileLabel) => dispatch({type: 'SET_HOVERED_SLOT', slotLabel, tileLabel})
+  slotTile: (slotLabel, tileLabel) => dispatch({type: 'SLOT_TILE', slotLabel, tileLabel}),
+  unSlotTile: (slotLabel) => dispatch({type: 'UNSLOT_TILE', slotLabel}),
+  setHoveredSlot: (slotLabel) => dispatch({type: 'SET_HOVERED_SLOT', slotLabel})
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Tile);

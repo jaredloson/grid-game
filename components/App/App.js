@@ -27,38 +27,37 @@ const reducer = (state = initialState, action) => {
     case 'TOGGLE_PAUSE_GAME':
       return {...state, gamePaused: !state.gamePaused}
 
-    case 'SET_HOVERED_SLOT': 
+    case 'SET_HOVERED_SLOT':
       return {
         ...state,
-        hoveredSlot: {slot: action.slotLabel, tile: action.tileLabel}
+        hoveredSlot: action.slotLabel
       }
 
-    case 'TOGGLE_SLOT_TILE':
-      const idx = state.slottedTiles.findIndex( node => node.slot === action.slotLabel );
+    case 'SLOT_TILE':
       const shuffledIdx = state.shuffledTiles.indexOf(action.tileLabel);
-      if (idx === -1) {
-        return {
-          ...state,
-          slottedTiles: [
-            ...state.slottedTiles,
-            {slot: action.slotLabel, tile: action.tileLabel}
-          ],
-          shuffledTiles: [
-            action.tileLabel,
-            ...state.shuffledTiles.slice(0, shuffledIdx),
-            ...state.shuffledTiles.slice(shuffledIdx + 1)
-          ],
-          hoveredSlot: {slot: null, tile: null}
-        }
-      } else {
-        return {
-          ...state,
-          slottedTiles: [
-            ...state.slottedTiles.slice(0, idx),
-            ...state.slottedTiles.slice(idx + 1)
-          ],
-          hoveredSlot: {slot: null, tile: null}
-        }
+      return {
+        ...state,
+        slottedTiles: [
+          ...state.slottedTiles,
+          {slot: action.slotLabel, tile: action.tileLabel}
+        ],
+        shuffledTiles: [
+          action.tileLabel,
+          ...state.shuffledTiles.slice(0, shuffledIdx),
+          ...state.shuffledTiles.slice(shuffledIdx + 1)
+        ],
+        hoveredSlot: null
+      }
+
+    case 'UNSLOT_TILE':
+      const unSlotIdx = state.slottedTiles.findIndex( node => node.slot === action.slotLabel );
+      return {
+        ...state,
+        slottedTiles: [
+          ...state.slottedTiles.slice(0, unSlotIdx),
+          ...state.slottedTiles.slice(unSlotIdx + 1)
+        ],
+        hoveredSlot: null
       }
 
     default:
@@ -67,7 +66,10 @@ const reducer = (state = initialState, action) => {
   }
 };
 
-const store = createStore(reducer);
+const store = createStore(
+  reducer,
+  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__() //this is necessary for React Native Debugger
+);
 
 class App extends Component {
   render() {
