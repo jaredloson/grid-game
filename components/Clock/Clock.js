@@ -3,6 +3,9 @@ import { connect } from 'react-redux';
 import { TouchableOpacity, Text } from 'react-native';
 import { styles } from './styles';
 import { CLOCKHEIGHT, TILES } from '../../config';
+import {togglePauseGame} from '../../redux/actions/actionCreators';
+import {getGameComplete} from '../../redux/selectors/index';
+
 
 class Clock extends Component {
 
@@ -63,12 +66,8 @@ class Clock extends Component {
 
 const mapStateToProps = (state, ownProps) => ({
   gameStarted: state.gameStarted,
-  gameComplete: state.slottedTiles.filter( node => node.slot === node.tile ).length === TILES,
+  gameComplete: getGameComplete(state),
   paused: state.gamePaused
 });
 
-const mapDispatchToProps = dispatch => ({ 
-  togglePauseGame: () => dispatch({type: 'TOGGLE_PAUSE_GAME'}) 
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(Clock);
+export default connect(mapStateToProps, {togglePauseGame})(Clock);

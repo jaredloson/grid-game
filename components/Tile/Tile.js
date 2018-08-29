@@ -4,6 +4,8 @@ import { connect } from 'react-redux';
 import { styles } from './styles';
 import { STAGEWIDTH, STAGEHEIGHT, TILES, COLUMNS, WIDTH, HEIGHT } from '../../config';
 import { propsChanged } from '../../utils';
+import {slotTile, unSlotTile, setHoveredSlot} from '../../redux/actions/actionCreators';
+import {getStartIndex, getStartXY, getIsSlottted, getGameComplete} from '../../redux/selectors/index';
 
 class Tile extends Component {
 
@@ -39,8 +41,8 @@ class Tile extends Component {
   componentDidUpdate(prevProps) {
   	const coordsChanged = (prevProps.x !== this.props.x || prevProps.y !== this.props.y) && !this.state.dragging;
   	const gameComplete = this.props.gameComplete;
-    const tilePlayed = this.props.playedSlot && !prevProps.playedSlot;
-    if (coordsChanged && !this.props.playedSlot) {
+    const tilePlayed = this.props.isSlottted && !prevProps.isSlottted;
+    if (coordsChanged && !this.props.isSlottted) {
       const easing = prevProps.gameComplete && !this.props.gameComplete ? Easing.bounce : undefined;
   		this.animatePosition({x: this.props.x, y: this.props.y, duration: 250, easing: easing});	
   	}
@@ -86,6 +88,7 @@ class Tile extends Component {
   }
 
   handleResponderMove(gestureState) {
+
   	let x = this.state.x + (gestureState.dx - this.state.lastDx);
     x = x < 0 ? 0 : x;
     x = x + this.props.width > STAGEWIDTH ? STAGEWIDTH - this.props.width : x;
@@ -99,7 +102,7 @@ class Tile extends Component {
     	lastDy: gestureState.dy,
       dragging: true
     }, () => {
-      if (this.props.playedSlot) {
+      if (this.props.isSlottted) {
         const idx = this.props.slottedTiles.findIndex( node => node.tile === this.props.label );
         const node = this.props.slottedTiles[idx];
         this.props.unSlotTile(node.slot);
@@ -116,10 +119,10 @@ class Tile extends Component {
     });
     const xy = this.props.hoveredSlot ? this.getSlotXY(this.getSlotIdx(this.props.hoveredSlot)) : {x: this.props.x, y: this.props.y};
     const duration = this.props.hoveredSlot ? 250 : 500;
-    this.animatePosition({...xy, duration, easing: this.props.hoveredSlot ? undefined : Easing.bounce, slotTile: this.props.hoveredSlot});
+    this.animatePosition({...xy, duration, easing: this.props.hoveredSlot ? undefined : Easing.bounce, setSlotTile: this.props.hoveredSlot});
   }
 
-  animatePosition({x, y, duration, easing = Easing.bezier(0.86, 0, 0.07, 1), slotTile = false}) {
+  animatePosition({x, y, duration, easing = Easing.bezier(0.86, 0, 0.07, 1), setSlotTile = false}) {
   	const translate = new Animated.ValueXY({
       x: this.state.x,
       y: this.state.y
@@ -131,7 +134,7 @@ class Tile extends Component {
         duration: duration
       }).start( () => {
         this.setState({x, y, translate: null});
-        if (slotTile) {
+        if (setSlotTile) {
           this.props.slotTile(this.props.hoveredSlot, this.props.label);
         }
       });
@@ -179,35 +182,14 @@ class Tile extends Component {
 
 }
 
-const getStartIdx = (state, props) => {
-  const playableTiles = state.shuffledTiles.filter( label => {
-    const idx = state.slottedTiles.findIndex( node => node.tile === label );
-    return idx === -1;
-  });
-  return playableTiles.indexOf(props.label);
-}
-
-const getXY = (state, props) => {  
-  const idx = getStartIdx(state, props);
-  const x = ( -idx + (COLUMNS - 1) ) * WIDTH;
-  const y = STAGEHEIGHT - HEIGHT;
-  return {x, y};
-}
-
 const mapStateToProps = (state, ownProps) => ({
-  ...getXY(state, ownProps),
+  ...getStartXY(state, ownProps),
   tiles: state.tiles,
   slottedTiles: state.slottedTiles,
   gameStarted: state.gameStarted,
-  playedSlot: state.slottedTiles.findIndex( node => node.tile === ownProps.label ) > -1,
-  gameComplete: state.slottedTiles.filter( node => node.slot === node.tile ).length === TILES,
+  isSlottted: getIsSlottted(state, ownProps),
+  gameComplete: getGameComplete(state),
   hoveredSlot: state.hoveredSlot
 });
 
-const mapDispatchToProps = dispatch => ({
-  slotTile: (slotLabel, tileLabel) => dispatch({type: 'SLOT_TILE', slotLabel, tileLabel}),
-  unSlotTile: (slotLabel) => dispatch({type: 'UNSLOT_TILE', slotLabel}),
-  setHoveredSlot: (slotLabel) => dispatch({type: 'SET_HOVERED_SLOT', slotLabel})
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(Tile);
+export default connect(mapStateToProps, {slotTile, unSlotTile, setHoveredSlot})(Tile);
