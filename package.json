@@ -6,7 +6,8 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "eject": "expo eject"
+    "eject": "expo eject",
+    "test": "jest --watchAll"
   },
   "dependencies": {
     "expo": "^29.0.0",
@@ -15,5 +16,16 @@
     "react-redux": "^5.0.7",
     "redux": "^4.0.0",
     "reselect": "^3.0.1"
+  },
+  "jest": {
+    "preset": "react-native",
+    "transform": {
+      "^.+\\.jsx?$": "babel-jest"
+    }
+  },
+  "devDependencies": {
+    "babel-jest": "^23.4.2",
+    "jest": "^23.5.0",
+    "react-test-renderer": "^16.4.2"
   }
 }
