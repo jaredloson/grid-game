@@ -9,6 +9,8 @@ import { shuffle } from '../../utils';
 // with their own logic governing them.
 // Read more:
 // - https://github.com/reduxjs/redux/blob/master/docs/recipes/reducers/UsingCombineReducers.md
+
+//Note: if the initial state changes, make sure you update the appropriate test in index.test.js
 const initialState = {
   tiles: [],
   shuffledTiles: [],
