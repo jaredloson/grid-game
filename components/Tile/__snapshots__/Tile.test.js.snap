@@ -1,0 +1,122 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Tile /> matches the snapshot 1`] = `
+<View
+  onMoveShouldSetResponder={[Function]}
+  onMoveShouldSetResponderCapture={[Function]}
+  onResponderEnd={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderReject={[Function]}
+  onResponderRelease={[Function]}
+  onResponderStart={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  onStartShouldSetResponderCapture={[Function]}
+  style={
+    Object {
+      "alignItems": "center",
+      "backgroundColor": "rgba(0,0,255, .75)",
+      "height": undefined,
+      "justifyContent": "center",
+      "left": undefined,
+      "position": "absolute",
+      "top": undefined,
+      "transform": Array [
+        Object {
+          "rotateY": "0deg",
+        },
+      ],
+      "width": undefined,
+      "zIndex": 1,
+    }
+  }
+>
+  <View
+    style={
+      Object {
+        "alignItems": "center",
+        "left": 0,
+        "position": "absolute",
+        "right": 0,
+        "top": 10,
+      }
+    }
+  >
+    <Text
+      accessible={true}
+      allowFontScaling={true}
+      ellipsizeMode="tail"
+      style={
+        Object {
+          "color": "#fff",
+          "marginBottom": 10,
+        }
+      }
+    >
+      drag me!
+    </Text>
+  </View>
+  <Text
+    accessible={true}
+    allowFontScaling={true}
+    ellipsizeMode="tail"
+    style={
+      Object {
+        "color": "#fff",
+        "fontSize": 40,
+      }
+    }
+  >
+    5
+  </Text>
+</View>
+`;
+
+exports[`<Tile /> matches the snapshot when game complete 1`] = `
+<View
+  onMoveShouldSetResponder={[Function]}
+  onMoveShouldSetResponderCapture={[Function]}
+  onResponderEnd={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderReject={[Function]}
+  onResponderRelease={[Function]}
+  onResponderStart={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  onStartShouldSetResponderCapture={[Function]}
+  style={
+    Object {
+      "alignItems": "center",
+      "backgroundColor": "rgba(0,180,0,.75)",
+      "height": undefined,
+      "justifyContent": "center",
+      "left": undefined,
+      "position": "absolute",
+      "top": undefined,
+      "transform": Array [
+        Object {
+          "rotateY": "0deg",
+        },
+      ],
+      "width": undefined,
+      "zIndex": 1,
+    }
+  }
+>
+  <Text
+    accessible={true}
+    allowFontScaling={true}
+    ellipsizeMode="tail"
+    style={
+      Object {
+        "color": "#fff",
+        "fontSize": 40,
+      }
+    }
+  />
+</View>
+`;
