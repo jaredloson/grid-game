@@ -32,14 +32,12 @@ const rootReducer = (state = initialState, action) => {
       return {...state, gamePaused: !state.gamePaused}
 
     case SET_HOVERED_SLOT:
-      console.log(action.slotLabel); 
       return {
         ...state,
         hoveredSlot: action.slotLabel
       }
 
     case SLOT_TILE:
-      const shuffledIdx = state.shuffledTiles.indexOf(action.tileLabel);
       return {
         ...state,
         slottedTiles: [
@@ -48,19 +46,19 @@ const rootReducer = (state = initialState, action) => {
         ],
         shuffledTiles: [
           action.tileLabel,
-          ...state.shuffledTiles.slice(0, shuffledIdx),
-          ...state.shuffledTiles.slice(shuffledIdx + 1)
+          ...state.shuffledTiles.slice(0, action.shuffledIdx),
+          ...state.shuffledTiles.slice(action.shuffledIdx + 1)
         ],
         hoveredSlot: null
       }
 
     case UNSLOT_TILE:
-      const slotIdx = state.slottedTiles.findIndex( node => node.slot === action.slotLabel );
+      //const slotIdx = state.slottedTiles.findIndex( node => node.slot === action.slotLabel );
       return {
         ...state,
         slottedTiles: [
-          ...state.slottedTiles.slice(0, slotIdx),
-          ...state.slottedTiles.slice(slotIdx + 1)
+          ...state.slottedTiles.slice(0, action.slotIdx),
+          ...state.slottedTiles.slice(action.slotIdx + 1)
         ],
         hoveredSlot: null
       }

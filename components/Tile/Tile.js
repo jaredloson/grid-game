@@ -103,9 +103,8 @@ class Tile extends Component {
       dragging: true
     }, () => {
       if (this.props.isSlottted) {
-        const idx = this.props.slottedTiles.findIndex( node => node.tile === this.props.label );
-        const node = this.props.slottedTiles[idx];
-        this.props.unSlotTile(node.slot);
+        const slotIdx = this.props.slottedTiles.findIndex( node => node.tile === this.props.label );
+        this.props.unSlotTile(slotIdx);
       }
     });
     this.setHovered();
@@ -135,7 +134,8 @@ class Tile extends Component {
       }).start( () => {
         this.setState({x, y, translate: null});
         if (setSlotTile) {
-          this.props.slotTile(this.props.hoveredSlot, this.props.label);
+          const shuffledIdx = this.props.shuffledTiles.indexOf(this.props.label);
+          this.props.slotTile(this.props.hoveredSlot, this.props.label, shuffledIdx);
         }
       });
     });
@@ -185,6 +185,7 @@ class Tile extends Component {
 const mapStateToProps = (state, ownProps) => ({
   ...getStartXY(state, ownProps),
   tiles: state.tiles,
+  shuffledTiles: state.shuffledTiles,
   slottedTiles: state.slottedTiles,
   gameStarted: state.gameStarted,
   isSlottted: getIsSlottted(state, ownProps),

@@ -14,18 +14,19 @@ export function setHoveredSlot(slotLabel){
     };
 }
 
-export function slotTile(slotLabel, tileLabel){
+export function slotTile(slotLabel, tileLabel, shuffledIdx){
     return {
         type: SLOT_TILE,
         slotLabel,
-        tileLabel
+        tileLabel,
+        shuffledIdx
     };
 }
 
-export function unSlotTile(slotLabel){
+export function unSlotTile(slotIdx){
     return {
         type: UNSLOT_TILE,
-        slotLabel
+        slotIdx
     };
 }
 
