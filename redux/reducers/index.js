@@ -19,10 +19,12 @@ const initialState = {
 }
 
 const rootReducer = (state = initialState, action) => {
+
   switch(action.type) {
 
     case SETUP_GAME:
-      const setupObject = initialState;
+      //object deep copy trick -- works as long as no props are functions
+      const setupObject = JSON.parse( JSON.stringify(initialState) );
       setupObject.gameStarted = action.startGame
       setupObject.tiles = [...Array(TILES)].map( (item, idx) => ( {label: idx + 1, child: null} ));
       setupObject.shuffledTiles = shuffle(setupObject.tiles.slice()).map( tile => tile.label );
@@ -53,7 +55,6 @@ const rootReducer = (state = initialState, action) => {
       }
 
     case UNSLOT_TILE:
-      //const slotIdx = state.slottedTiles.findIndex( node => node.slot === action.slotLabel );
       return {
         ...state,
         slottedTiles: [
@@ -67,6 +68,7 @@ const rootReducer = (state = initialState, action) => {
       return state;
 
   }
+
 };
 
 export default rootReducer;
